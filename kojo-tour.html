@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>タテイシ広美社 ものづくり見学ツアー デモ｜案2</title>
+<style>
+  :root{ --navy:#1F3864; --accent:#E8590C; --accent2:#2F9E44; --bg:#0d1f3d; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif; width:100vw; height:100vh; overflow:hidden; background:#eef1f6;}
+  #app{width:100%; height:100%; position:relative;}
+  .screen{position:absolute; inset:0; display:none; flex-direction:column;}
+  .screen.active{display:flex;}
+
+  /* ---- Idle ---- */
+  #screen-idle{
+    background:radial-gradient(circle at 30% 20%, #24406e, var(--bg));
+    color:#fff; align-items:center; justify-content:center; text-align:center; cursor:pointer;
+  }
+  #screen-idle h1{font-size:2.6rem; margin-bottom:10px;}
+  #screen-idle .sub{font-size:1.2rem; opacity:.8; margin-bottom:34px;}
+  #screen-idle .badge-row{display:flex; gap:14px; margin-bottom:30px;}
+  #screen-idle .badge-row span{background:rgba(255,255,255,.12); padding:8px 18px; border-radius:30px; font-size:.95rem;}
+  #screen-idle .tap{font-size:1.5rem; padding:16px 46px; border-radius:60px; background:var(--accent); animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.05);}100%{transform:scale(1);}}
+
+  header{background:var(--navy); color:#fff; padding:16px 26px; display:flex; align-items:center; justify-content:space-between;}
+  header .brand{font-size:1.2rem; font-weight:bold;}
+  .lang-toggle{display:flex; gap:6px;}
+  .lang-toggle button{padding:6px 16px; border-radius:20px; border:2px solid rgba(255,255,255,.4); background:none; color:#fff; font-size:.9rem; cursor:pointer;}
+  .lang-toggle button.active{background:var(--accent); border-color:var(--accent); font-weight:bold;}
+
+  main{flex:1; overflow:auto; padding:28px 34px;}
+
+  /* ---- Menu ---- */
+  .menu-title{font-size:1.6rem; font-weight:bold; color:var(--navy); margin-bottom:6px;}
+  .menu-sub{color:#666; margin-bottom:22px;}
+  .start-btn{
+    display:block; margin:0 auto 30px; padding:20px 60px; font-size:1.4rem; font-weight:bold; color:#fff;
+    background:var(--accent); border:none; border-radius:60px; cursor:pointer;
+  }
+  .stop-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px;}
+  .stop-card{
+    background:#fff; border-radius:16px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); cursor:pointer;
+    border:3px solid transparent; text-align:center;
+  }
+  .stop-card:hover, .stop-card:active{border-color:var(--accent);}
+  .stop-card .num{width:34px; height:34px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-weight:bold;}
+  .stop-card .icon{font-size:2.6rem; margin-bottom:8px;}
+  .stop-card h3{font-size:1.05rem; color:var(--navy);}
+
+  /* ---- Detail ---- */
+  .detail-wrap{display:grid; grid-template-columns:1.1fr 1fr; gap:28px; height:100%;}
+  .photo-box{
+    background:linear-gradient(135deg,#dfe6f0,#c3cfe0); border-radius:18px; display:flex; align-items:center; justify-content:center;
+    font-size:5rem; color:#8895ab;
+  }
+  .detail-text .tag{display:inline-block; background:var(--navy); color:#fff; padding:5px 14px; border-radius:20px; font-size:.85rem; margin-bottom:12px;}
+  .detail-text h2{font-size:1.7rem; color:var(--navy); margin-bottom:14px;}
+  .detail-text p{font-size:1.05rem; line-height:1.8; color:#333; margin-bottom:14px;}
+  .safety-note{background:#fff4e0; border-left:6px solid var(--accent); padding:14px 18px; border-radius:10px; font-size:.95rem; margin-top:12px;}
+  .nav-row{display:flex; justify-content:space-between; margin-top:24px;}
+  .nav-btn{padding:14px 28px; font-size:1.05rem; border-radius:40px; border:none; cursor:pointer; font-weight:bold;}
+  .nav-btn.prev{background:#e9ecef; color:#333;}
+  .nav-btn.next{background:var(--accent); color:#fff;}
+  .progress-dots{display:flex; gap:8px; justify-content:center; margin-top:20px;}
+  .progress-dots span{width:10px; height:10px; border-radius:50%; background:#d0d7e2;}
+  .progress-dots span.on{background:var(--accent);}
+
+  /* ---- Experience / End ---- */
+  .experience-box{background:#fff; border-radius:18px; padding:30px; box-shadow:0 2px 10px rgba(0,0,0,.08); text-align:center;}
+  .qr{width:150px; height:150px; margin:20px auto; background:repeating-linear-gradient(45deg,#333,#333 6px,#fff 6px,#fff 12px); border-radius:8px;}
+  .back-top{margin-top:26px; padding:14px 34px; border-radius:40px; border:2px solid var(--navy); background:none; color:var(--navy); font-weight:bold; cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="screen-idle" class="screen active">
+    <div class="badge-row"><span>🏭 ものづくり見学</span><span>🈂️ 日本語/English</span><span>🖐️ タッチで操作</span></div>
+    <h1 id="idleTitle">タテイシ広美社 ものづくり見学ツアー</h1>
+    <div class="sub" id="idleSub">看板・LEDビジョンができるまでを、その場で体験</div>
+    <div class="tap" id="idleTap">タップしてスタート ▶</div>
+  </div>
+
+  <div id="screen-menu" class="screen">
+    <header>
+      <div class="brand" id="menuBrand">タテイシ広美社 ものづくり見学ツアー</div>
+      <div class="lang-toggle">
+        <button id="btnJa" class="active" onclick="setLang('ja')">日本語</button>
+        <button id="btnEn" onclick="setLang('en')">English</button>
+      </div>
+    </header>
+    <main>
+      <div class="menu-title" id="menuTitle">見学ルートを選んでください</div>
+      <div class="menu-sub" id="menuSub">気になる工程からタップして見学できます。順番に見る場合は「見学スタート」を押してください。</div>
+      <button class="start-btn" id="startBtn" onclick="startTour()">見学スタート ▶</button>
+      <div class="stop-grid" id="stopGrid"></div>
+    </main>
+  </div>
+
+  <div id="screen-detail" class="screen">
+    <header>
+      <div class="brand" id="detailBrand">タテイシ広美社 ものづくり見学ツアー</div>
+      <div class="lang-toggle">
+        <button id="btnJa2" class="active" onclick="setLang('ja')">日本語</button>
+        <button id="btnEn2" onclick="setLang('en')">English</button>
+      </div>
+    </header>
+    <main>
+      <div class="detail-wrap">
+        <div class="photo-box" id="photoBox">🏭</div>
+        <div class="detail-text">
+          <span class="tag" id="detailTag">1 / 6</span>
+          <h2 id="detailTitle">-</h2>
+          <p id="detailBody">-</p>
+          <div class="safety-note" id="safetyNote"></div>
+        </div>
+      </div>
+      <div class="progress-dots" id="progressDots"></div>
+      <div class="nav-row">
+        <button class="nav-btn prev" id="prevBtn" onclick="prevStop()">◀ 前の工程</button>
+        <button class="nav-btn next" id="nextBtn" onclick="nextStop()">次の工程 ▶</button>
+      </div>
+    </main>
+  </div>
+
+  <div id="screen-end" class="screen">
+    <header>
+      <div class="brand" id="endBrand">タテイシ広美社 ものづくり見学ツアー</div>
+      <div class="lang-toggle">
+        <button class="active" onclick="setLang('ja')">日本語</button>
+        <button onclick="setLang('en')">English</button>
+      </div>
+    </header>
+    <main style="display:flex; align-items:center; justify-content:center;">
+      <div class="experience-box">
+        <h2 id="endTitle" style="color:var(--navy); font-size:1.6rem; margin-bottom:10px;">見学おつかれさまでした！</h2>
+        <p id="endBody">最後に、実際のEloタッチサイネージでサイネージ制作を疑似体験してみましょう。<br>QRコードから見学の感想アンケートにもご協力ください。</p>
+        <div class="qr"></div>
+        <button class="back-top" onclick="goto('screen-idle')" id="backTopBtn">トップにもどる</button>
+      </div>
+    </main>
+  </div>
+
+</div>
+
+<script>
+const STOPS = [
+  {icon:"🛎️", ja:{title:"受付・本社ロビー", body:"タテイシ広美社のご紹介と、社内に掲示している案内板の実例をご覧いただけます。看板・サイネージ・LEDビジョン・保守点検までを一貫して手がける表示ソリューション企業です。", safety:"見学中は係員の指示に従い、白線の内側を歩行してください。"},
+        en:{title:"Reception / Lobby", body:"An introduction to T-KOBISHA, a display solutions company handling signage, digital signage, LED vision and maintenance in-house.", safety:"Please follow staff instructions and stay inside the marked walkway."}},
+  {icon:"✏️", ja:{title:"設計・デザイン室", body:"お客様のご要望をもとに、企画デザイン課・設計開発課が製作図を作成する現場です。看板からデジタルサイネージのコンテンツ設計まで手がけています。", safety:""},
+        en:{title:"Design & Engineering Room", body:"Where our planning and design teams turn customer requests into production drawings, from signage to digital signage content."}},
+  {icon:"🔩", ja:{title:"板金・鉄加工エリア", body:"看板の骨格となる板金加工・鉄加工・メッキ処理を行うエリアです。大型サインの筐体もここで組み上げます。", safety:"火花や騒音が発生するため、指定の見学通路からご覧ください。"},
+        en:{title:"Sheet Metal & Steel Fabrication", body:"Sheet metal work, steel fabrication and plating that form the frame of large signage."}},
+  {icon:"🎨", ja:{title:"塗装ブース", body:"看板・サイン什器に色を吹き付ける塗装工程です。屋外広告物としての耐候性を確保するための塗装ノウハウを紹介します。", safety:"塗装ブース内は立入禁止です。ガラス越しにご見学ください。"},
+        en:{title:"Paint Booth", body:"Painting process that gives signage its color and weather resistance for outdoor use."}},
+  {icon:"🖨️", ja:{title:"UV印刷・シルク印刷／レーザー彫刻エリア", body:"看板面板への印刷や、導光板のレーザー彫刻を行うエリアです。細かな文字やロゴもここで美しく仕上げます。", safety:""},
+        en:{title:"UV/Silk Printing & Laser Engraving", body:"Printing on signage panels and laser engraving of light guide plates for precise logos and text."}},
+  {icon:"📺", ja:{title:"LEDビジョン・サイネージ組立エリア", body:"LEDビジョンやデジタルサイネージ機器を組み立てる、当社の技術の集大成エリアです。ここでEloタッチサイネージの実機もご覧いただけます。", safety:""},
+        en:{title:"LED Vision & Signage Assembly", body:"Where LED vision units and digital signage devices are assembled — including our Elo touch signage demo unit."}},
+];
+
+let lang = "ja";
+let currentStop = 0;
+
+function goto(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+document.getElementById('screen-idle').addEventListener('click', ()=> goto('screen-menu'));
+
+function buildStopGrid(){
+  const grid = document.getElementById('stopGrid');
+  grid.innerHTML = "";
+  STOPS.forEach((s,i)=>{
+    const t = s[lang];
+    const card = document.createElement('div');
+    card.className = "stop-card";
+    card.innerHTML = `<div class="num">${i+1}</div><div class="icon">${s.icon}</div><h3>${t.title}</h3>`;
+    card.onclick = ()=>{ currentStop=i; showDetail(); };
+    grid.appendChild(card);
+  });
+}
+
+function startTour(){ currentStop = 0; showDetail(); }
+
+function showDetail(){
+  const s = STOPS[currentStop];
+  const t = s[lang];
+  document.getElementById('photoBox').textContent = s.icon;
+  document.getElementById('detailTag').textContent = (currentStop+1)+" / "+STOPS.length;
+  document.getElementById('detailTitle').textContent = t.title;
+  document.getElementById('detailBody').textContent = t.body;
+  const safetyEl = document.getElementById('safetyNote');
+  if(t.safety){ safetyEl.style.display='block'; safetyEl.textContent = (lang==='ja'?"⚠ 安全上のご案内：":"⚠ Safety note: ")+t.safety; }
+  else { safetyEl.style.display='none'; }
+  document.getElementById('prevBtn').style.visibility = currentStop===0 ? 'hidden':'visible';
+  document.getElementById('nextBtn').textContent = currentStop===STOPS.length-1 ? (lang==='ja'?"見学を終える ▶":"Finish tour ▶") : (lang==='ja'?"次の工程 ▶":"Next ▶");
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = STOPS.map((_,i)=>`<span class="${i===currentStop?'on':''}"></span>`).join("");
+  goto('screen-detail');
+}
+function nextStop(){
+  if(currentStop < STOPS.length-1){ currentStop++; showDetail(); }
+  else { goto('screen-end'); }
+}
+function prevStop(){
+  if(currentStop>0){ currentStop--; showDetail(); }
+}
+
+const I18N = {
+  ja:{menuBrand:"タテイシ広美社 ものづくり見学ツアー", menuTitle:"見学ルートを選んでください", menuSub:"気になる工程からタップして見学できます。順番に見る場合は「見学スタート」を押してください。", startBtn:"見学スタート ▶", idleTitle:"タテイシ広美社 ものづくり見学ツアー", idleSub:"看板・LEDビジョンができるまでを、その場で体験", idleTap:"タップしてスタート ▶", endTitle:"見学おつかれさまでした！", endBody:"最後に、実際のEloタッチサイネージでサイネージ制作を疑似体験してみましょう。<br>QRコードから見学の感想アンケートにもご協力ください。", backTopBtn:"トップにもどる"},
+  en:{menuBrand:"T-KOBISHA Factory Tour", menuTitle:"Choose a stop on the tour", menuSub:"Tap any stop to view it, or press Start Tour to go through them in order.", startBtn:"Start Tour ▶", idleTitle:"T-KOBISHA Factory Tour", idleSub:"Experience how signage and LED vision are made", idleTap:"Tap to Start ▶", endTitle:"Thanks for joining the tour!", endBody:"Finally, try creating signage content yourself on our Elo touch signage demo unit.<br>Please also scan the QR code for a short survey.", backTopBtn:"Back to Top"}
+};
+function setLang(l){
+  lang = l;
+  const t = I18N[l];
+  document.getElementById('idleTitle').textContent = t.idleTitle;
+  document.getElementById('idleSub').textContent = t.idleSub;
+  document.getElementById('idleTap').textContent = t.idleTap;
+  document.getElementById('menuBrand').textContent = t.menuBrand;
+  document.getElementById('detailBrand').textContent = t.menuBrand;
+  document.getElementById('endBrand').textContent = t.menuBrand;
+  document.getElementById('menuTitle').textContent = t.menuTitle;
+  document.getElementById('menuSub').textContent = t.menuSub;
+  document.getElementById('startBtn').textContent = t.startBtn;
+  document.getElementById('endTitle').textContent = t.endTitle;
+  document.getElementById('endBody').innerHTML = t.endBody;
+  document.getElementById('backTopBtn').textContent = t.backTopBtn;
+  [['btnJa','btnEn'],['btnJa2','btnEn2']].forEach(([jaId,enId])=>{
+    const jaEl=document.getElementById(jaId), enEl=document.getElementById(enId);
+    if(jaEl){ jaEl.classList.toggle('active', l==='ja'); enEl.classList.toggle('active', l==='en'); }
+  });
+  buildStopGrid();
+  if(document.getElementById('screen-detail').classList.contains('active')) showDetail();
+}
+
+buildStopGrid();
+</script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>売場タッチサイネージ デモ｜案3</title>
+<style>
+  :root{
+    --navy:#1F3864; --accent:#E8590C; --accent2:#2F9E44; --bg:#F4F6F9;
+    --card:#FFFFFF; --warn:#C92A2A; --wait:#F08C00;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif;
+    background:var(--bg); color:#222; width:100vw; height:100vh; overflow:hidden;
+  }
+  #app{width:100%; height:100%; display:flex; flex-direction:column;}
+
+  /* ---- Idle / Attract screen ---- */
+  #idle{
+    position:fixed; inset:0; z-index:50;
+    background:linear-gradient(135deg,var(--navy),#0d1f3d);
+    color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; cursor:pointer;
+  }
+  #idle h1{font-size:3.2rem; margin-bottom:12px; letter-spacing:.05em;}
+  #idle p{font-size:1.4rem; opacity:.85; margin-bottom:36px;}
+  #idle .tap{
+    font-size:1.6rem; padding:18px 48px; border-radius:60px; background:var(--accent);
+    animation:pulse 1.6s infinite;
+  }
+  @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.06);}100%{transform:scale(1);}}
+  #idle .icons{font-size:2.6rem; margin-bottom:28px; letter-spacing:.3em;}
+
+  /* ---- Header / Tabs ---- */
+  header{
+    background:var(--navy); color:#fff; padding:18px 28px; display:flex; align-items:center; justify-content:space-between;
+  }
+  header .brand{font-size:1.3rem; font-weight:bold;}
+  header .clock{font-size:1.1rem; opacity:.85;}
+  nav{display:flex; background:#0d1f3d;}
+  nav button{
+    flex:1; padding:20px 10px; font-size:1.35rem; font-weight:bold; color:#cfd8e8;
+    background:none; border:none; border-bottom:5px solid transparent; cursor:pointer;
+  }
+  nav button.active{color:#fff; border-bottom-color:var(--accent); background:rgba(255,255,255,.06);}
+
+  main{flex:1; overflow:auto; padding:26px 32px;}
+  .section-title{font-size:1.4rem; font-weight:bold; color:var(--navy); margin-bottom:16px; display:flex; align-items:center; gap:10px;}
+  .section-title .badge{font-size:.85rem; background:var(--navy); color:#fff; padding:4px 12px; border-radius:20px; font-weight:normal;}
+
+  /* ---- Bakery schedule ---- */
+  .sheet-status{font-size:.85rem; color:#888; margin-bottom:14px;}
+  .sheet-status.live{color:var(--accent2); font-weight:bold;}
+  .bake-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px;}
+  .bake-card{
+    background:var(--card); border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,.08);
+    border-left:8px solid #ccc; position:relative; transition:transform .2s;
+  }
+  .bake-card.done{border-left-color:var(--accent2);}
+  .bake-card.soon{border-left-color:var(--wait); animation:glow 1.4s infinite;}
+  .bake-card.prep{border-left-color:#adb5bd;}
+  @keyframes glow{0%{box-shadow:0 2px 10px rgba(240,140,0,.15);}50%{box-shadow:0 2px 22px rgba(240,140,0,.55);}100%{box-shadow:0 2px 10px rgba(240,140,0,.15);}}
+  .bake-card .icon{font-size:2.4rem;}
+  .bake-card h3{font-size:1.15rem; margin:8px 0 4px;}
+  .bake-card .time{font-size:1.6rem; font-weight:bold; color:var(--navy);}
+  .bake-card .status{
+    display:inline-block; margin-top:10px; padding:4px 14px; border-radius:20px; font-size:.85rem; font-weight:bold; color:#fff;
+  }
+  .bake-card.done .status{background:var(--accent2);}
+  .bake-card.soon .status{background:var(--wait);}
+  .bake-card.prep .status{background:#adb5bd;}
+  .bake-card .memo{font-size:.8rem; color:#888; margin-top:6px;}
+
+  /* ---- Reservation ---- */
+  .res-layout{display:grid; grid-template-columns:1.1fr 1.4fr; gap:24px; height:100%;}
+  .counter-select{display:flex; gap:14px; margin-bottom:18px;}
+  .counter-btn{
+    flex:1; padding:16px; border-radius:14px; border:3px solid #ddd; background:#fff; font-size:1.1rem; font-weight:bold; cursor:pointer;
+  }
+  .counter-btn.sel-fish{border-color:#1c7ed6; background:#e7f5ff; color:#1c7ed6;}
+  .counter-btn.sel-meat{border-color:var(--warn); background:#fff0f0; color:var(--warn);}
+  .item-list{display:flex; flex-direction:column; gap:10px;}
+  .item-btn{
+    text-align:left; padding:16px 18px; border-radius:12px; border:2px solid #e3e6ea; background:#fff; font-size:1.05rem; cursor:pointer;
+  }
+  .item-btn.picked{border-color:var(--accent); background:#fff4e8; font-weight:bold;}
+  .reserve-btn{
+    margin-top:18px; padding:18px; font-size:1.3rem; font-weight:bold; color:#fff; background:var(--accent);
+    border:none; border-radius:14px; cursor:pointer; width:100%;
+  }
+  .reserve-btn:disabled{background:#ccc; cursor:not-allowed;}
+  .board{background:var(--card); border-radius:16px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,.08); overflow:auto;}
+  .board table{width:100%; border-collapse:collapse; font-size:1.05rem;}
+  .board th{text-align:left; padding:10px 8px; border-bottom:2px solid #eee; color:#888; font-size:.85rem;}
+  .board td{padding:12px 8px; border-bottom:1px solid #f1f3f5;}
+  .tag{padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:bold; color:#fff; display:inline-block;}
+  .tag.uketsuke{background:#868e96;}
+  .tag.chori{background:var(--wait);}
+  .tag.yobidashi{background:var(--warn); animation:blink 1s infinite;}
+  .tag.kanryo{background:var(--accent2);}
+  @keyframes blink{0%{opacity:1;}50%{opacity:.45;}100%{opacity:1;}}
+  .my-number{
+    background:linear-gradient(135deg,var(--accent),#f08c00); color:#fff; border-radius:16px; padding:22px; text-align:center;
+    margin-bottom:18px; display:none;
+  }
+  .my-number.show{display:block;}
+  .my-number .num{font-size:2.6rem; font-weight:bold;}
+</style>
+</head>
+<body>
+<div id="idle">
+  <div class="icons">🥖 🐟 🥩</div>
+  <h1>タッチしてはじめる</h1>
+  <p>本日の焼き上がり情報／鮮魚・精肉の調理予約ができます</p>
+  <div class="tap">タップしてスタート ▶</div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="brand">エブリイ 〇〇店　売場インフォメーション</div>
+    <div class="clock" id="clock"></div>
+  </header>
+  <nav>
+    <button class="tab-btn active" data-tab="bakery">🥖 製菓コーナー｜焼き上がりスケジュール</button>
+    <button class="tab-btn" data-tab="reserve">🐟🥩 鮮魚・精肉コーナー｜調理予約</button>
+  </nav>
+  <main>
+    <section id="tab-bakery">
+      <div class="section-title">本日の焼き上がりスケジュール <span class="badge">タップ不要・自動更新</span></div>
+      <div class="sheet-status" id="sheetStatus">Googleスプレッドシートからの読み込みを試行中...</div>
+      <div class="bake-grid" id="bakeGrid"></div>
+    </section>
+
+    <section id="tab-reserve" style="display:none;">
+      <div class="section-title">鮮魚・精肉 調理予約 <span class="badge">タップして予約 → 番号でお呼び出し</span></div>
+      <div class="res-layout">
+        <div>
+          <div class="my-number" id="myNumber">
+            <div>あなたの受付番号</div>
+            <div class="num" id="myNumberText">-</div>
+            <div id="myNumberStatus">準備中</div>
+          </div>
+          <div class="counter-select">
+            <button class="counter-btn" id="btnFish" onclick="selectCounter('鮮魚')">🐟 鮮魚コーナー</button>
+            <button class="counter-btn" id="btnMeat" onclick="selectCounter('精肉')">🥩 精肉コーナー</button>
+          </div>
+          <div class="item-list" id="itemList"></div>
+          <button class="reserve-btn" id="reserveBtn" disabled onclick="makeReservation()">この内容で予約する</button>
+        </div>
+        <div class="board">
+          <div class="section-title" style="margin-bottom:10px;">呼び出し状況ボード</div>
+          <table>
+            <thead><tr><th>番号</th><th>コーナー</th><th>内容</th><th>受付時刻</th><th>状況</th></tr></thead>
+            <tbody id="boardBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const SHEET_ID = "1LVE3lwkyBy4D7dQmxpf1l5pSZ_LFGNJMB0x6UcEibNg";
+const SHEET_NAME_BAKERY = "焼き上がりスケジュール";
+
+// ---- Idle screen ----
+document.getElementById('idle').addEventListener('click', function(){
+  this.style.display='none';
+});
+
+// ---- Clock ----
+function tickClock(){
+  const d = new Date();
+  document.getElementById('clock').textContent =
+    d.getFullYear()+"年"+(d.getMonth()+1)+"月"+d.getDate()+"日 "+
+    String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0');
+}
+tickClock(); setInterval(tickClock, 1000*10);
+
+// ---- Tabs ----
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-bakery').style.display = btn.dataset.tab==='bakery' ? 'block':'none';
+    document.getElementById('tab-reserve').style.display = btn.dataset.tab==='reserve' ? 'block':'none';
+  });
+});
+
+// ---- Bakery schedule: try live Google Sheet CSV, fallback to embedded sample ----
+const FALLBACK_BAKE = [
+  {name:"クロワッサン", cat:"パン", time:"10:00", status:"焼き上がり済み", memo:"朝の定番"},
+  {name:"メロンパン", cat:"パン", time:"10:30", status:"焼き上がり済み", memo:"人気No.1"},
+  {name:"食パン(角切りOK)", cat:"パン", time:"11:00", status:"まもなく焼き上がり", memo:"当日中要冷凍可"},
+  {name:"マルゲリータピザ", cat:"ピザ", time:"11:15", status:"まもなく焼き上がり", memo:"窯焼き"},
+  {name:"惣菜パン(焼きそば)", cat:"パン", time:"11:30", status:"準備中", memo:""},
+  {name:"クアトロフォルマッジ", cat:"ピザ", time:"12:00", status:"準備中", memo:"チーズ4種"},
+  {name:"フランスパン", cat:"パン", time:"13:00", status:"準備中", memo:""},
+  {name:"アップルパイ", cat:"焼き菓子", time:"13:30", status:"準備中", memo:"季節限定"},
+  {name:"照り焼きチキンピザ", cat:"ピザ", time:"14:00", status:"準備中", memo:""},
+  {name:"メロンパン(2便)", cat:"パン", time:"15:00", status:"準備中", memo:"2便目"},
+];
+const ICONS = {"パン":"🥖","ピザ":"🍕","焼き菓子":"🥧"};
+
+function statusClass(s){
+  if(s.indexOf("済み")>-1) return "done";
+  if(s.indexOf("まもなく")>-1) return "soon";
+  return "prep";
+}
+function renderBake(rows){
+  const grid = document.getElementById('bakeGrid');
+  grid.innerHTML = "";
+  rows.forEach(r=>{
+    const cls = statusClass(r.status);
+    grid.innerHTML += `<div class="bake-card ${cls}">
+      <div class="icon">${ICONS[r.cat]||"🍞"}</div>
+      <h3>${r.name}</h3>
+      <div class="time">${r.time}〜</div>
+      <div class="status">${r.status}</div>
+      ${r.memo?`<div class="memo">${r.memo}</div>`:""}
+    </div>`;
+  });
+}
+function parseCSV(text){
+  const lines = text.trim().split("\n");
+  const rows = lines.slice(1).map(line=>{
+    // very simple CSV split good enough for this demo's plain data
+    const cols = line.split(",").map(c=>c.replace(/^"|"$/g,"").trim());
+    return {name:cols[0], cat:cols[1], time:cols[2], status:cols[3], memo:cols[4]||""};
+  });
+  return rows.filter(r=>r.name);
+}
+async function loadBakerySheet(){
+  const statusEl = document.getElementById('sheetStatus');
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME_BAKERY)}`;
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("not shared publicly yet");
+    const text = await res.text();
+    const rows = parseCSV(text);
+    if(rows.length===0) throw new Error("empty");
+    renderBake(rows);
+    statusEl.textContent = "Googleスプレッドシートから読み込み済み(リアルタイム連携中)";
+    statusEl.classList.add("live");
+  }catch(e){
+    renderBake(FALLBACK_BAKE);
+    statusEl.textContent = "サンプルデータを表示中(スプレッドシートを「リンクを知っている全員が閲覧可」に共有すると自動でライブ連携されます)";
+  }
+}
+loadBakerySheet();
+setInterval(loadBakerySheet, 60*1000);
+
+// ---- Reservation simulation ----
+let selectedCounter = null;
+let selectedItem = null;
+let myCounter = 0;
+let board = [
+  {no:"A-10", counter:"精肉", item:"ステーキ用カット", time:"10:30", status:"完了"},
+  {no:"A-11", counter:"鮮魚", item:"タイの昆布締め", time:"10:35", status:"完了"},
+  {no:"A-12", counter:"鮮魚", item:"刺身盛り合わせ加工", time:"10:42", status:"調理中"},
+  {no:"A-13", counter:"精肉", item:"焼肉用カット(600g)", time:"10:45", status:"調理中"},
+  {no:"A-14", counter:"鮮魚", item:"アジの三枚おろし", time:"10:48", status:"呼び出し中"},
+  {no:"A-15", counter:"精肉", item:"から揚げ用カット", time:"10:50", status:"呼び出し中"},
+];
+myCounter = 15;
+
+const ITEMS = {
+  "鮮魚": ["刺身盛り合わせ加工","三枚おろし","昆布締め加工","塩焼き用下処理"],
+  "精肉": ["ステーキ用カット","焼肉用カット","から揚げ用カット","しゃぶしゃぶ用スライス"],
+};
+
+function selectCounter(c){
+  selectedCounter = c; selectedItem = null;
+  document.getElementById('btnFish').classList.toggle('sel-fish', c==='鮮魚');
+  document.getElementById('btnMeat').classList.toggle('sel-meat', c==='精肉');
+  const list = document.getElementById('itemList');
+  list.innerHTML = "";
+  ITEMS[c].forEach(it=>{
+    const b = document.createElement('button');
+    b.className = "item-btn";
+    b.textContent = it;
+    b.onclick = ()=>{
+      selectedItem = it;
+      document.querySelectorAll('.item-btn').forEach(x=>x.classList.remove('picked'));
+      b.classList.add('picked');
+      document.getElementById('reserveBtn').disabled = false;
+    };
+    list.appendChild(b);
+  });
+  document.getElementById('reserveBtn').disabled = true;
+}
+
+function pad(n){return String(n).padStart(2,'0');}
+
+function makeReservation(){
+  myCounter++;
+  const no = "A-"+myCounter;
+  const d = new Date();
+  const time = pad(d.getHours())+":"+pad(d.getMinutes());
+  const entry = {no, counter:selectedCounter, item:selectedItem, time, status:"受付"};
+  board.push(entry);
+  renderBoard();
+  document.getElementById('myNumber').classList.add('show');
+  document.getElementById('myNumberText').textContent = no;
+  document.getElementById('myNumberStatus').textContent = "受付完了・準備中です";
+  document.getElementById('reserveBtn').disabled = true;
+
+  // simulate progression: 受付 -> 調理中 -> 呼び出し中
+  setTimeout(()=>{ updateStatus(no,"調理中"); document.getElementById('myNumberStatus').textContent="調理中です。しばらくお待ちください"; }, 6000);
+  setTimeout(()=>{ updateStatus(no,"呼び出し中"); document.getElementById('myNumberStatus').textContent="お呼び出し中！コーナーまでお越しください"; }, 14000);
+  setTimeout(()=>{ updateStatus(no,"完了"); document.getElementById('myNumberStatus').textContent="お渡し完了"; }, 22000);
+}
+function updateStatus(no, status){
+  const e = board.find(x=>x.no===no);
+  if(e){ e.status = status; renderBoard(); }
+}
+function tagClass(s){
+  if(s==="受付") return "uketsuke";
+  if(s==="調理中") return "chori";
+  if(s==="呼び出し中") return "yobidashi";
+  return "kanryo";
+}
+function renderBoard(){
+  const body = document.getElementById('boardBody');
+  body.innerHTML = "";
+  board.slice().reverse().forEach(e=>{
+    body.innerHTML += `<tr>
+      <td><strong>${e.no}</strong></td>
+      <td>${e.counter}</td>
+      <td>${e.item}</td>
+      <td>${e.time}</td>
+      <td><span class="tag ${tagClass(e.status)}">${e.status}</span></td>
+    </tr>`;
+  });
+}
+renderBoard();
+selectCounter('鮮魚');
+</script>
+</body>
+</html>
