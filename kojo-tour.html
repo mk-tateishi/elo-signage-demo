@@ -3,241 +3,347 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>タテイシ広美社 ものづくり見学ツアー デモ｜案2</title>
+<title>タテイシ広美社 ものづくり見学ガイド｜案2</title>
 <style>
-  :root{ --navy:#1F3864; --accent:#E8590C; --accent2:#2F9E44; --bg:#0d1f3d; }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  body{font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif; width:100vw; height:100vh; overflow:hidden; background:#eef1f6;}
+  :root{ --navy:#1F3864; --navy-d:#132540; --accent:#E8590C; --accent2:#2F9E44; --bg:#0d1f3d;
+    --card:#ffffff; --ink:#1a2740; --muted:#6b7a90; }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{font-family:"Hiragino Sans","Yu Gothic","Meiryo",sans-serif; width:100vw; height:100vh; overflow:hidden; background:#eef1f6; color:var(--ink);}
   #app{width:100%; height:100%; position:relative;}
   .screen{position:absolute; inset:0; display:none; flex-direction:column;}
   .screen.active{display:flex;}
+  button{font-family:inherit; cursor:pointer;}
 
-  /* ---- Idle ---- */
-  #screen-idle{
-    background:radial-gradient(circle at 30% 20%, #24406e, var(--bg));
-    color:#fff; align-items:center; justify-content:center; text-align:center; cursor:pointer;
-  }
-  #screen-idle h1{font-size:2.6rem; margin-bottom:10px;}
-  #screen-idle .sub{font-size:1.2rem; opacity:.8; margin-bottom:34px;}
-  #screen-idle .badge-row{display:flex; gap:14px; margin-bottom:30px;}
-  #screen-idle .badge-row span{background:rgba(255,255,255,.12); padding:8px 18px; border-radius:30px; font-size:.95rem;}
-  #screen-idle .tap{font-size:1.5rem; padding:16px 46px; border-radius:60px; background:var(--accent); animation:pulse 1.6s infinite;}
+  /* IDLE */
+  #screen-idle{background:radial-gradient(circle at 30% 20%,#24406e,var(--bg)); color:#fff; align-items:center; justify-content:center; text-align:center; cursor:pointer;}
+  #screen-idle .badges{display:flex; gap:14px; margin-bottom:26px;}
+  #screen-idle .badges span{background:rgba(255,255,255,.12); padding:8px 18px; border-radius:30px; font-size:.95rem;}
+  #screen-idle h1{font-size:2.8rem; margin-bottom:10px;}
+  #screen-idle .sub{font-size:1.2rem; opacity:.8; margin-bottom:36px;}
+  #screen-idle .tap{font-size:1.5rem; padding:16px 48px; border-radius:60px; background:var(--accent); animation:pulse 1.6s infinite;}
   @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.05);}100%{transform:scale(1);}}
 
-  header{background:var(--navy); color:#fff; padding:16px 26px; display:flex; align-items:center; justify-content:space-between;}
-  header .brand{font-size:1.2rem; font-weight:bold;}
-  .lang-toggle{display:flex; gap:6px;}
-  .lang-toggle button{padding:6px 16px; border-radius:20px; border:2px solid rgba(255,255,255,.4); background:none; color:#fff; font-size:.9rem; cursor:pointer;}
-  .lang-toggle button.active{background:var(--accent); border-color:var(--accent); font-weight:bold;}
+  header{background:var(--navy); color:#fff; padding:14px 26px; display:flex; align-items:center; justify-content:space-between;}
+  header .home-btn{display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.12); border:none; color:#fff; padding:10px 18px; border-radius:40px; font-size:1rem;}
+  header .brand{font-size:1.15rem; font-weight:bold;}
+  header .spacer{width:120px;}
+  main{flex:1; overflow:auto; padding:26px 34px;}
 
-  main{flex:1; overflow:auto; padding:28px 34px;}
+  /* HOME */
+  .home-hero{text-align:center; margin:6px 0 26px;}
+  .home-hero h2{font-size:1.7rem; color:var(--navy);}
+  .home-hero p{color:var(--muted); margin-top:6px;}
+  .tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; max-width:1000px; margin:0 auto;}
+  .tile{background:var(--card); border-radius:22px; padding:36px 22px; text-align:center; box-shadow:0 4px 18px rgba(0,0,0,.1); border:3px solid transparent; color:var(--ink);}
+  .tile:hover{border-color:var(--accent);} .tile:active{transform:scale(.98);}
+  .tile .ic{font-size:3.6rem; margin-bottom:14px;}
+  .tile h3{font-size:1.35rem; color:var(--navy); margin-bottom:6px;}
+  .tile small{color:var(--muted);}
 
-  /* ---- Menu ---- */
-  .menu-title{font-size:1.6rem; font-weight:bold; color:var(--navy); margin-bottom:6px;}
-  .menu-sub{color:#666; margin-bottom:22px;}
-  .start-btn{
-    display:block; margin:0 auto 30px; padding:20px 60px; font-size:1.4rem; font-weight:bold; color:#fff;
-    background:var(--accent); border:none; border-radius:60px; cursor:pointer;
-  }
-  .stop-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px;}
-  .stop-card{
-    background:#fff; border-radius:16px; padding:22px; box-shadow:0 2px 10px rgba(0,0,0,.08); cursor:pointer;
-    border:3px solid transparent; text-align:center;
-  }
-  .stop-card:hover, .stop-card:active{border-color:var(--accent);}
-  .stop-card .num{width:34px; height:34px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-weight:bold;}
-  .stop-card .icon{font-size:2.6rem; margin-bottom:8px;}
-  .stop-card h3{font-size:1.05rem; color:var(--navy);}
+  .page-title{font-size:1.5rem; font-weight:bold; color:var(--navy); margin-bottom:6px; display:flex; align-items:center; gap:10px;}
+  .page-sub{color:var(--muted); margin-bottom:20px;}
 
-  /* ---- Detail ---- */
-  .detail-wrap{display:grid; grid-template-columns:1.1fr 1fr; gap:28px; height:100%;}
-  .photo-box{
-    background:linear-gradient(135deg,#dfe6f0,#c3cfe0); border-radius:18px; display:flex; align-items:center; justify-content:center;
-    font-size:5rem; color:#8895ab;
-  }
-  .detail-text .tag{display:inline-block; background:var(--navy); color:#fff; padding:5px 14px; border-radius:20px; font-size:.85rem; margin-bottom:12px;}
-  .detail-text h2{font-size:1.7rem; color:var(--navy); margin-bottom:14px;}
-  .detail-text p{font-size:1.05rem; line-height:1.8; color:#333; margin-bottom:14px;}
-  .safety-note{background:#fff4e0; border-left:6px solid var(--accent); padding:14px 18px; border-radius:10px; font-size:.95rem; margin-top:12px;}
+  /* photo/video placeholder */
+  .ph{position:relative; background:linear-gradient(135deg,#dfe6f0,#c3cfe0); display:flex; align-items:center; justify-content:center; overflow:hidden; color:#8895ab;}
+  .ph::after{content:attr(data-emoji); font-size:4.4rem;}
+  .ph img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+
+  /* PROCESS */
+  .proc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px;}
+  .proc-card{background:var(--card); border-radius:16px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.09); border:3px solid transparent; text-align:left;}
+  .proc-card:hover{border-color:var(--accent);}
+  .proc-card .ph{height:150px;}
+  .proc-card .body{padding:16px 18px;}
+  .proc-card .num{display:inline-block; background:var(--navy); color:#fff; width:30px; height:30px; border-radius:50%; text-align:center; line-height:30px; font-weight:bold; margin-bottom:8px;}
+  .proc-card h3{font-size:1.15rem; color:var(--navy); margin-bottom:6px;}
+  .proc-card p{font-size:.92rem; color:#555; line-height:1.6;}
+  .proc-card .vtag{display:inline-flex; align-items:center; gap:6px; margin-top:12px; color:var(--accent); font-weight:bold; font-size:.9rem;}
+
+  /* PROCESS DETAIL */
+  .pd-wrap{display:grid; grid-template-columns:1.2fr 1fr; gap:28px;}
+  .pd-media .ph{height:300px; border-radius:16px;}
+  .pd-video{margin-top:16px; background:#0d1f3d; border-radius:14px; height:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#cdd8ea; gap:8px; position:relative; overflow:hidden;}
+  .pd-video .play{width:56px; height:56px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.5rem;}
+  .pd-video video{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
+  .pd-info .tag{display:inline-block; background:var(--navy); color:#fff; padding:5px 14px; border-radius:20px; font-size:.85rem; margin-bottom:12px;}
+  .pd-info h2{font-size:1.9rem; color:var(--navy); margin-bottom:14px;}
+  .pd-info p{font-size:1.05rem; line-height:1.9; color:#333; margin-bottom:14px;}
+  .safety{background:#fff4e0; border-left:6px solid var(--accent); padding:12px 16px; border-radius:10px; font-size:.95rem;}
   .nav-row{display:flex; justify-content:space-between; margin-top:24px;}
-  .nav-btn{padding:14px 28px; font-size:1.05rem; border-radius:40px; border:none; cursor:pointer; font-weight:bold;}
-  .nav-btn.prev{background:#e9ecef; color:#333;}
-  .nav-btn.next{background:var(--accent); color:#fff;}
-  .progress-dots{display:flex; gap:8px; justify-content:center; margin-top:20px;}
-  .progress-dots span{width:10px; height:10px; border-radius:50%; background:#d0d7e2;}
-  .progress-dots span.on{background:var(--accent);}
+  .nav-btn{padding:14px 26px; font-size:1.02rem; border-radius:40px; border:none; font-weight:bold;}
+  .nav-btn.prev{background:#e9ecef; color:#333;} .nav-btn.next{background:var(--accent); color:#fff;}
 
-  /* ---- Experience / End ---- */
-  .experience-box{background:#fff; border-radius:18px; padding:30px; box-shadow:0 2px 10px rgba(0,0,0,.08); text-align:center;}
-  .qr{width:150px; height:150px; margin:20px auto; background:repeating-linear-gradient(45deg,#333,#333 6px,#fff 6px,#fff 12px); border-radius:8px;}
-  .back-top{margin-top:26px; padding:14px 34px; border-radius:40px; border:2px solid var(--navy); background:none; color:var(--navy); font-weight:bold; cursor:pointer;}
+  /* CASES */
+  .filter-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;}
+  .chip{padding:9px 18px; border-radius:30px; border:2px solid #c7d0de; background:#fff; color:var(--navy); font-size:.95rem; font-weight:bold;}
+  .chip.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+  .timeline{position:relative; padding-left:34px;}
+  .timeline::before{content:""; position:absolute; left:12px; top:6px; bottom:6px; width:3px; background:#c7d0de;}
+  .tl-item{position:relative; margin-bottom:20px;}
+  .tl-item::before{content:""; position:absolute; left:-27px; top:22px; width:14px; height:14px; border-radius:50%; background:var(--accent); border:3px solid #fff;}
+  .tl-year{font-weight:bold; color:var(--navy); font-size:1.1rem; margin-bottom:8px;}
+  .case-card{display:flex; gap:16px; background:var(--card); border-radius:14px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.08); border:3px solid transparent; text-align:left; width:100%;}
+  .case-card:hover{border-color:var(--accent);}
+  .case-card .ph{width:150px; min-height:110px; flex-shrink:0;}
+  .case-card .ph::after{font-size:2.8rem;}
+  .case-card .cbody{padding:14px 16px;}
+  .case-card .ctype{display:inline-block; font-size:.75rem; color:#fff; padding:3px 10px; border-radius:20px; margin-bottom:6px;}
+  .case-card h4{font-size:1.1rem; color:var(--navy); margin-bottom:4px;}
+  .case-card small{color:var(--muted);}
+  .t-led{background:#1c7ed6;} .t-sign{background:#e8590c;} .t-signage{background:#7048e8;} .t-const{background:#2f9e44;}
+
+  /* CASE DETAIL */
+  .cd-wrap{display:grid; grid-template-columns:1.2fr 1fr; gap:28px;}
+  .cd-media .ph{height:320px; border-radius:16px;}
+  .cd-info h2{font-size:1.8rem; color:var(--navy); margin:8px 0 14px;}
+  .cd-info .spec{list-style:none;}
+  .cd-info .spec li{display:flex; padding:10px 0; border-bottom:1px solid #eef1f6; font-size:1rem;}
+  .cd-info .spec li b{width:120px; color:var(--muted); font-weight:normal;}
+
+  /* HISTORY */
+  .hist{position:relative; padding-left:36px; max-width:900px;}
+  .hist::before{content:""; position:absolute; left:13px; top:6px; bottom:6px; width:3px; background:var(--navy); opacity:.3;}
+  .hist-item{position:relative; margin-bottom:26px; background:var(--card); border-radius:14px; padding:18px 22px; box-shadow:0 2px 10px rgba(0,0,0,.07);}
+  .hist-item::before{content:""; position:absolute; left:-29px; top:22px; width:16px; height:16px; border-radius:50%; background:var(--navy); border:3px solid #fff;}
+  .hist-item .y{font-size:1.3rem; font-weight:bold; color:var(--accent);}
+  .hist-item h4{color:var(--navy); margin:2px 0 6px; font-size:1.15rem;}
+  .hist-item p{color:#555; line-height:1.7;}
+
+  .note{margin-top:26px; font-size:.82rem; color:var(--muted); text-align:center;}
 </style>
 </head>
 <body>
 <div id="app">
 
+  <!-- IDLE -->
   <div id="screen-idle" class="screen active">
-    <div class="badge-row"><span>🏭 ものづくり見学</span><span>🈂️ 日本語/English</span><span>🖐️ タッチで操作</span></div>
-    <h1 id="idleTitle">タテイシ広美社 ものづくり見学ツアー</h1>
-    <div class="sub" id="idleSub">看板・LEDビジョンができるまでを、その場で体験</div>
-    <div class="tap" id="idleTap">タップしてスタート ▶</div>
+    <div class="badges"><span>🏭 ものづくり見学</span><span>🎬 工程を写真・動画で</span><span>🖐️ タッチで操作</span></div>
+    <h1>タテイシ広美社 ものづくり見学ガイド</h1>
+    <div class="sub">看板・LEDビジョンができるまで／施工事例／会社の歴史</div>
+    <div class="tap">タッチしてはじめる ▶</div>
   </div>
 
-  <div id="screen-menu" class="screen">
-    <header>
-      <div class="brand" id="menuBrand">タテイシ広美社 ものづくり見学ツアー</div>
-      <div class="lang-toggle">
-        <button id="btnJa" class="active" onclick="setLang('ja')">日本語</button>
-        <button id="btnEn" onclick="setLang('en')">English</button>
-      </div>
-    </header>
+  <!-- HOME -->
+  <div id="screen-home" class="screen">
+    <header><div class="spacer"></div><div class="brand">🏭 タテイシ広美社 ものづくり見学ガイド</div><div class="spacer"></div></header>
     <main>
-      <div class="menu-title" id="menuTitle">見学ルートを選んでください</div>
-      <div class="menu-sub" id="menuSub">気になる工程からタップして見学できます。順番に見る場合は「見学スタート」を押してください。</div>
-      <button class="start-btn" id="startBtn" onclick="startTour()">見学スタート ▶</button>
-      <div class="stop-grid" id="stopGrid"></div>
+      <div class="home-hero"><h2>ようこそ、工場見学へ</h2><p>ご覧になりたい項目をタッチしてください</p></div>
+      <div class="tiles">
+        <button class="tile" onclick="openProcess()"><div class="ic">🎬</div><h3>看板ができるまで</h3><small>普段は見られない製作工程を写真・動画で</small></button>
+        <button class="tile" onclick="openCases('all')"><div class="ic">🏗️</div><h3>施工事例</h3><small>これまでの実績を年表・種類から</small></button>
+        <button class="tile" onclick="goto('screen-history')"><div class="ic">📖</div><h3>会社の歴史</h3><small>創業からのあゆみ</small></button>
+      </div>
     </main>
   </div>
 
-  <div id="screen-detail" class="screen">
-    <header>
-      <div class="brand" id="detailBrand">タテイシ広美社 ものづくり見学ツアー</div>
-      <div class="lang-toggle">
-        <button id="btnJa2" class="active" onclick="setLang('ja')">日本語</button>
-        <button id="btnEn2" onclick="setLang('en')">English</button>
-      </div>
-    </header>
+  <!-- PROCESS LIST -->
+  <div id="screen-process" class="screen">
+    <header><button class="home-btn" onclick="goto('screen-home')">🏠 ホーム</button><div class="brand">🎬 看板ができるまで</div><div class="spacer"></div></header>
     <main>
-      <div class="detail-wrap">
-        <div class="photo-box" id="photoBox">🏭</div>
-        <div class="detail-text">
-          <span class="tag" id="detailTag">1 / 6</span>
-          <h2 id="detailTitle">-</h2>
-          <p id="detailBody">-</p>
-          <div class="safety-note" id="safetyNote"></div>
+      <div class="page-title">看板・LEDビジョンができるまで</div>
+      <div class="page-sub">気になる工程をタッチすると、写真と動画で詳しく見られます。</div>
+      <div class="proc-grid" id="procGrid"></div>
+    </main>
+  </div>
+
+  <!-- PROCESS DETAIL -->
+  <div id="screen-proc-detail" class="screen">
+    <header><button class="home-btn" onclick="goto('screen-process')">◀ 工程一覧へ</button><div class="brand" id="pdBrand">看板ができるまで</div><div class="spacer"></div></header>
+    <main>
+      <div class="pd-wrap">
+        <div class="pd-media">
+          <div class="ph" id="pdPhoto" data-emoji="🏭"></div>
+          <div class="pd-video" id="pdVideoBox"><div class="play">▶</div><div id="pdVideoLabel">工程の動画を再生</div></div>
+        </div>
+        <div class="pd-info">
+          <span class="tag" id="pdTag">1 / 6</span>
+          <h2 id="pdTitle">-</h2>
+          <p id="pdBody">-</p>
+          <div class="safety" id="pdSafety"></div>
+          <div class="nav-row">
+            <button class="nav-btn prev" id="pdPrev" onclick="pdStep(-1)">◀ 前の工程</button>
+            <button class="nav-btn next" id="pdNext" onclick="pdStep(1)">次の工程 ▶</button>
+          </div>
         </div>
       </div>
-      <div class="progress-dots" id="progressDots"></div>
-      <div class="nav-row">
-        <button class="nav-btn prev" id="prevBtn" onclick="prevStop()">◀ 前の工程</button>
-        <button class="nav-btn next" id="nextBtn" onclick="nextStop()">次の工程 ▶</button>
+    </main>
+  </div>
+
+  <!-- CASES -->
+  <div id="screen-cases" class="screen">
+    <header><button class="home-btn" onclick="goto('screen-home')">🏠 ホーム</button><div class="brand">🏗️ 施工事例</div><div class="spacer"></div></header>
+    <main>
+      <div class="page-title">施工事例</div>
+      <div class="page-sub">製品の種類でしぼり込み、年表からタッチしてご覧いただけます。</div>
+      <div class="filter-row" id="caseFilter"></div>
+      <div class="timeline" id="caseTimeline"></div>
+      <div class="note" id="caseNote">※ 表示中の事例はサンプルです。実データ・写真に差し替えて本番運用できます。</div>
+    </main>
+  </div>
+
+  <!-- CASE DETAIL -->
+  <div id="screen-case-detail" class="screen">
+    <header><button class="home-btn" onclick="goto('screen-cases')">◀ 事例一覧へ</button><div class="brand">🏗️ 施工事例</div><div class="spacer"></div></header>
+    <main>
+      <div class="cd-wrap">
+        <div class="cd-media"><div class="ph" id="cdPhoto" data-emoji="🏢"></div></div>
+        <div class="cd-info">
+          <span class="ctype" id="cdType">LEDビジョン</span>
+          <h2 id="cdTitle">-</h2>
+          <ul class="spec" id="cdSpec"></ul>
+          <p id="cdDesc" style="margin-top:16px; line-height:1.9; color:#333;"></p>
+        </div>
       </div>
     </main>
   </div>
 
-  <div id="screen-end" class="screen">
-    <header>
-      <div class="brand" id="endBrand">タテイシ広美社 ものづくり見学ツアー</div>
-      <div class="lang-toggle">
-        <button class="active" onclick="setLang('ja')">日本語</button>
-        <button onclick="setLang('en')">English</button>
-      </div>
-    </header>
-    <main style="display:flex; align-items:center; justify-content:center;">
-      <div class="experience-box">
-        <h2 id="endTitle" style="color:var(--navy); font-size:1.6rem; margin-bottom:10px;">見学おつかれさまでした！</h2>
-        <p id="endBody">最後に、実際のEloタッチサイネージでサイネージ制作を疑似体験してみましょう。<br>QRコードから見学の感想アンケートにもご協力ください。</p>
-        <div class="qr"></div>
-        <button class="back-top" onclick="goto('screen-idle')" id="backTopBtn">トップにもどる</button>
-      </div>
+  <!-- HISTORY -->
+  <div id="screen-history" class="screen">
+    <header><button class="home-btn" onclick="goto('screen-home')">🏠 ホーム</button><div class="brand">📖 会社の歴史</div><div class="spacer"></div></header>
+    <main>
+      <div class="page-title">会社のあゆみ</div>
+      <div class="page-sub">創業から現在までの歩みをご紹介します。</div>
+      <div class="hist" id="histList"></div>
+      <div class="note">※ 年号・内容はサンプルです。実際の沿革に差し替えてください。</div>
     </main>
   </div>
 
 </div>
 
 <script>
-const STOPS = [
-  {icon:"🛎️", ja:{title:"受付・本社ロビー", body:"タテイシ広美社のご紹介と、社内に掲示している案内板の実例をご覧いただけます。看板・サイネージ・LEDビジョン・保守点検までを一貫して手がける表示ソリューション企業です。", safety:"見学中は係員の指示に従い、白線の内側を歩行してください。"},
-        en:{title:"Reception / Lobby", body:"An introduction to T-KOBISHA, a display solutions company handling signage, digital signage, LED vision and maintenance in-house.", safety:"Please follow staff instructions and stay inside the marked walkway."}},
-  {icon:"✏️", ja:{title:"設計・デザイン室", body:"お客様のご要望をもとに、企画デザイン課・設計開発課が製作図を作成する現場です。看板からデジタルサイネージのコンテンツ設計まで手がけています。", safety:""},
-        en:{title:"Design & Engineering Room", body:"Where our planning and design teams turn customer requests into production drawings, from signage to digital signage content."}},
-  {icon:"🔩", ja:{title:"板金・鉄加工エリア", body:"看板の骨格となる板金加工・鉄加工・メッキ処理を行うエリアです。大型サインの筐体もここで組み上げます。", safety:"火花や騒音が発生するため、指定の見学通路からご覧ください。"},
-        en:{title:"Sheet Metal & Steel Fabrication", body:"Sheet metal work, steel fabrication and plating that form the frame of large signage."}},
-  {icon:"🎨", ja:{title:"塗装ブース", body:"看板・サイン什器に色を吹き付ける塗装工程です。屋外広告物としての耐候性を確保するための塗装ノウハウを紹介します。", safety:"塗装ブース内は立入禁止です。ガラス越しにご見学ください。"},
-        en:{title:"Paint Booth", body:"Painting process that gives signage its color and weather resistance for outdoor use."}},
-  {icon:"🖨️", ja:{title:"UV印刷・シルク印刷／レーザー彫刻エリア", body:"看板面板への印刷や、導光板のレーザー彫刻を行うエリアです。細かな文字やロゴもここで美しく仕上げます。", safety:""},
-        en:{title:"UV/Silk Printing & Laser Engraving", body:"Printing on signage panels and laser engraving of light guide plates for precise logos and text."}},
-  {icon:"📺", ja:{title:"LEDビジョン・サイネージ組立エリア", body:"LEDビジョンやデジタルサイネージ機器を組み立てる、当社の技術の集大成エリアです。ここでEloタッチサイネージの実機もご覧いただけます。", safety:""},
-        en:{title:"LED Vision & Signage Assembly", body:"Where LED vision units and digital signage devices are assembled — including our Elo touch signage demo unit."}},
+/* ====== 素材の置き場所 ======
+   写真: assets/kojo/ に配置（下記 photo のファイル名）
+   動画: assets/kojo/ に配置（下記 video のファイル名, mp4）
+   ファイルが無い場合は自動的にプレースホルダー(絵文字)を表示します。 */
+
+const PROCESS = [
+  {emoji:"📐", photo:"assets/kojo/proc1.jpg", video:"assets/kojo/proc1.mp4", title:"設計・デザイン",
+   body:"お客様のご要望をもとに、企画デザイン課・設計開発課が製作図面とデザインを起こします。看板からデジタルサイネージのコンテンツ設計まで、ここがものづくりの出発点です。", safety:""},
+  {emoji:"🔩", photo:"assets/kojo/proc2.jpg", video:"assets/kojo/proc2.mp4", title:"板金・鉄骨加工",
+   body:"看板の骨格となる板金加工・鉄骨加工を行います。レーザー加工機や溶接で、大型サインの筐体を一つひとつ形にしていきます。普段は見られない、迫力の加工現場です。", safety:"火花・騒音が発生します。指定の見学通路からご覧ください。"},
+  {emoji:"🛠️", photo:"assets/kojo/proc3.jpg", video:"assets/kojo/proc3.mp4", title:"溶接・組み立て",
+   body:"加工した部材を溶接し、看板の構造体として組み上げます。ミリ単位の精度が、屋外で長く安全に立ち続けるサインを支えています。", safety:"溶接光は直接見ないでください。"},
+  {emoji:"🎨", photo:"assets/kojo/proc4.jpg", video:"assets/kojo/proc4.mp4", title:"塗装",
+   body:"看板・サイン什器に塗装を施します。屋外広告物としての耐候性を確保するため、下地から仕上げまで職人が丁寧に吹き付けていきます。", safety:"塗装ブース内は立入禁止です。ガラス越しにご見学ください。"},
+  {emoji:"🖨️", photo:"assets/kojo/proc5.jpg", video:"assets/kojo/proc5.mp4", title:"印刷・シート貼り／LEDビジョン組立",
+   body:"面板へのUV印刷やシート貼り、そしてLEDビジョン・デジタルサイネージ機器の組み立てを行います。細かな文字やロゴも、ここで美しく仕上がります。", safety:""},
+  {emoji:"🏗️", photo:"assets/kojo/proc6.jpg", video:"assets/kojo/proc6.mp4", title:"現地施工・設置",
+   body:"完成した看板・LEDビジョンを現場へ運び、クレーンや高所作業車を使って設置します。工場での製作から現地施工まで、一貫して自社で手がけています。", safety:"高所・重量物作業のため、現場は安全管理を徹底しています。"},
 ];
 
-let lang = "ja";
-let currentStop = 0;
+const CASE_TYPES = [
+  {id:"all", label:"すべて", cls:""},
+  {id:"led", label:"LEDビジョン", cls:"t-led"},
+  {id:"sign", label:"看板・サイン", cls:"t-sign"},
+  {id:"signage", label:"デジタルサイネージ", cls:"t-signage"},
+  {id:"const", label:"施工", cls:"t-const"},
+];
+const CASES = [
+  {year:"2026", type:"led", emoji:"📺", photo:"assets/kojo/case1.jpg", title:"大学キャンパス 屋外大型LEDビジョン",
+   spec:{"種別":"屋外LEDビジョン","規模":"W6.0m × H3.4m","納期":"約3ヶ月","対応":"設計〜製作〜施工〜保守"},
+   desc:"キャンパスのシンボルとなる屋外大型LEDビジョンを設置。設計から施工、定期保守までを一貫対応しました。"},
+  {year:"2026", type:"signage", emoji:"🖐️", photo:"assets/kojo/case2.jpg", title:"金融機関 店頭タッチサイネージ",
+   spec:{"種別":"タッチサイネージ","台数":"複数店舗展開","納期":"約2ヶ月","対応":"什器製作〜コンテンツ〜設置"},
+   desc:"店頭案内をタッチ操作で提供するデジタルサイネージを導入。什器製作からコンテンツまで自社で対応しました。"},
+  {year:"2025", type:"sign", emoji:"🏢", photo:"assets/kojo/case3.jpg", title:"商業施設 ファサードサイン一式",
+   spec:{"種別":"看板・サイン","範囲":"外装サイン一式","納期":"約2ヶ月","対応":"デザイン〜製作〜施工"},
+   desc:"商業施設の顔となるファサードサインを一式製作・施工。ブランドイメージに合わせたデザインを実現しました。"},
+  {year:"2025", type:"led", emoji:"🏟️", photo:"assets/kojo/case4.jpg", title:"スポーツ施設 メッシュLEDビジョン",
+   spec:{"種別":"メッシュLEDビジョン","特徴":"軽量・透過タイプ","納期":"約2ヶ月","対応":"製作〜施工〜年次点検"},
+   desc:"風の影響を受けにくいメッシュタイプのLEDビジョンを施工。年次点検による保守も継続しています。"},
+  {year:"2024", type:"const", emoji:"🏗️", photo:"assets/kojo/case5.jpg", title:"不動産 壁面LEDビジョン設置工事",
+   spec:{"種別":"施工・設置工事","場所":"ビル壁面","納期":"約1.5ヶ月","対応":"構造検討〜設置施工"},
+   desc:"ビル壁面への大型LEDビジョン設置工事を担当。構造検討から安全な設置施工までを実施しました。"},
+  {year:"2023", type:"signage", emoji:"🗺️", photo:"assets/kojo/case6.jpg", title:"観光案内所 多言語タッチKIOSK",
+   spec:{"種別":"デジタルサイネージ","機能":"多言語・フロア案内","納期":"約2ヶ月","対応":"什器〜コンテンツ〜運用"},
+   desc:"訪日観光客向けに多言語対応のタッチKIOSKを導入。フロア案内・周辺情報を提供しています。"},
+  {year:"2022", type:"sign", emoji:"🔤", photo:"assets/kojo/case7.jpg", title:"店舗チェーン 屋外サイン標準化",
+   spec:{"種別":"看板・サイン","範囲":"複数店舗の統一サイン","納期":"継続案件","対応":"設計〜量産〜施工"},
+   desc:"チェーン店舗の屋外サインを標準化し、複数店舗へ展開。統一感のあるブランド表現を支えました。"},
+];
 
-function goto(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+const HISTORY = [
+  {y:"創業", h:"看板製作業として創業", p:"地域の看板づくりからスタート。ものづくりの技術を磨いてきました。"},
+  {y:"発展期", h:"板金・鉄工・塗装まで一貫体制へ", p:"設計から製作・施工までを自社で行う一貫体制を確立しました。"},
+  {y:"拡大期", h:"デジタルサイネージ事業を開始", p:"従来の看板に加え、デジタルサイネージ・LEDビジョンへと事業領域を拡大しました。"},
+  {y:"現在", h:"LEDビジョン・タッチソリューションへ", p:"大型LEDビジョンからタッチサイネージ、保守点検まで、表示ソリューションを総合的に手がけています。"},
+];
+
+let pdIdx=0, curCaseFilter="all";
+function goto(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+document.getElementById('screen-idle').addEventListener('click',()=>goto('screen-home'));
+
+/* helper: photo with fallback */
+function photoHTML(src,emoji){return `<img src="${src}" onerror="this.style.display='none'">`;}
+
+/* PROCESS */
+function openProcess(){
+  document.getElementById('procGrid').innerHTML=PROCESS.map((p,i)=>`
+    <button class="proc-card" onclick="openPd(${i})">
+      <div class="ph" data-emoji="${p.emoji}">${photoHTML(p.photo)}</div>
+      <div class="body"><span class="num">${i+1}</span><h3>${p.title}</h3><p>${p.body.slice(0,42)}…</p>
+      <span class="vtag">▶ 動画で見る</span></div>
+    </button>`).join("");
+  goto('screen-process');
+}
+function openPd(i){pdIdx=i;renderPd();goto('screen-proc-detail');}
+function renderPd(){
+  const p=PROCESS[pdIdx];
+  document.getElementById('pdPhoto').setAttribute('data-emoji',p.emoji);
+  document.getElementById('pdPhoto').innerHTML=photoHTML(p.photo);
+  const vb=document.getElementById('pdVideoBox');
+  vb.innerHTML=`<div class="play">▶</div><div>${p.title}の動画を再生</div>`;
+  vb.onclick=()=>{ vb.innerHTML=`<video src="${p.video}" controls autoplay onerror="this.parentNode.innerHTML='<div style=\\'color:#cdd8ea;padding:20px;text-align:center\\'>▶ 動画（${p.video}）を配置すると再生されます</div>'"></video>`; };
+  document.getElementById('pdTag').textContent=(pdIdx+1)+" / "+PROCESS.length;
+  document.getElementById('pdTitle').textContent=p.title;
+  document.getElementById('pdBody').textContent=p.body;
+  const s=document.getElementById('pdSafety');
+  if(p.safety){s.style.display='block';s.textContent="⚠ 安全上のご案内："+p.safety;}else{s.style.display='none';}
+  document.getElementById('pdPrev').style.visibility=pdIdx===0?'hidden':'visible';
+  document.getElementById('pdNext').textContent=pdIdx===PROCESS.length-1?"最初にもどる ▶":"次の工程 ▶";
+}
+function pdStep(d){pdIdx=(pdIdx+d+PROCESS.length)%PROCESS.length;renderPd();}
+
+/* CASES */
+function openCases(f){curCaseFilter=f;renderCaseFilter();renderCases();goto('screen-cases');}
+function renderCaseFilter(){
+  document.getElementById('caseFilter').innerHTML=CASE_TYPES.map(ct=>`<button class="chip ${ct.id===curCaseFilter?'active':''}" onclick="openCases('${ct.id}')">${ct.label}</button>`).join("");
+}
+function typeInfo(id){return CASE_TYPES.find(c=>c.id===id)||{label:id,cls:""};}
+function renderCases(){
+  const list=curCaseFilter==='all'?CASES:CASES.filter(c=>c.type===curCaseFilter);
+  const years=[...new Set(list.map(c=>c.year))];
+  document.getElementById('caseTimeline').innerHTML=years.map(y=>{
+    const items=list.filter(c=>c.year===y).map(c=>{
+      const ti=typeInfo(c.type);const idx=CASES.indexOf(c);
+      return `<button class="case-card" onclick="openCaseDetail(${idx})">
+        <div class="ph" data-emoji="${c.emoji}">${photoHTML(c.photo)}</div>
+        <div class="cbody"><span class="ctype ${ti.cls}">${ti.label}</span><h4>${c.title}</h4><small>${Object.values(c.spec)[0]||''}</small></div>
+      </button>`;}).join("");
+    return `<div class="tl-item"><div class="tl-year">${y}年</div><div style="display:flex;flex-direction:column;gap:12px">${items}</div></div>`;
+  }).join("");
+}
+function openCaseDetail(i){
+  const c=CASES[i];const ti=typeInfo(c.type);
+  const ph=document.getElementById('cdPhoto');ph.setAttribute('data-emoji',c.emoji);ph.innerHTML=photoHTML(c.photo);
+  const tp=document.getElementById('cdType');tp.textContent=ti.label;tp.className="ctype "+ti.cls;
+  document.getElementById('cdTitle').textContent=c.title;
+  document.getElementById('cdSpec').innerHTML=Object.entries(c.spec).map(([k,v])=>`<li><b>${k}</b><span>${v}</span></li>`).join("");
+  document.getElementById('cdDesc').textContent=c.desc;
+  goto('screen-case-detail');
 }
 
-document.getElementById('screen-idle').addEventListener('click', ()=> goto('screen-menu'));
+/* HISTORY */
+document.getElementById('histList').innerHTML=HISTORY.map(h=>`
+  <div class="hist-item"><div class="y">${h.y}</div><h4>${h.h}</h4><p>${h.p}</p></div>`).join("");
 
-function buildStopGrid(){
-  const grid = document.getElementById('stopGrid');
-  grid.innerHTML = "";
-  STOPS.forEach((s,i)=>{
-    const t = s[lang];
-    const card = document.createElement('div');
-    card.className = "stop-card";
-    card.innerHTML = `<div class="num">${i+1}</div><div class="icon">${s.icon}</div><h3>${t.title}</h3>`;
-    card.onclick = ()=>{ currentStop=i; showDetail(); };
-    grid.appendChild(card);
-  });
+/* Hash routing: 設置場所ごとに開始画面を指定できる (#home/#process/#cases/#history) */
+function route(){
+  const h=(location.hash||'').replace('#','');
+  if(h==='process')openProcess(); else if(h==='cases')openCases('all');
+  else if(h==='history')goto('screen-history'); else if(h==='home')goto('screen-home');
 }
-
-function startTour(){ currentStop = 0; showDetail(); }
-
-function showDetail(){
-  const s = STOPS[currentStop];
-  const t = s[lang];
-  document.getElementById('photoBox').textContent = s.icon;
-  document.getElementById('detailTag').textContent = (currentStop+1)+" / "+STOPS.length;
-  document.getElementById('detailTitle').textContent = t.title;
-  document.getElementById('detailBody').textContent = t.body;
-  const safetyEl = document.getElementById('safetyNote');
-  if(t.safety){ safetyEl.style.display='block'; safetyEl.textContent = (lang==='ja'?"⚠ 安全上のご案内：":"⚠ Safety note: ")+t.safety; }
-  else { safetyEl.style.display='none'; }
-  document.getElementById('prevBtn').style.visibility = currentStop===0 ? 'hidden':'visible';
-  document.getElementById('nextBtn').textContent = currentStop===STOPS.length-1 ? (lang==='ja'?"見学を終える ▶":"Finish tour ▶") : (lang==='ja'?"次の工程 ▶":"Next ▶");
-  const dots = document.getElementById('progressDots');
-  dots.innerHTML = STOPS.map((_,i)=>`<span class="${i===currentStop?'on':''}"></span>`).join("");
-  goto('screen-detail');
-}
-function nextStop(){
-  if(currentStop < STOPS.length-1){ currentStop++; showDetail(); }
-  else { goto('screen-end'); }
-}
-function prevStop(){
-  if(currentStop>0){ currentStop--; showDetail(); }
-}
-
-const I18N = {
-  ja:{menuBrand:"タテイシ広美社 ものづくり見学ツアー", menuTitle:"見学ルートを選んでください", menuSub:"気になる工程からタップして見学できます。順番に見る場合は「見学スタート」を押してください。", startBtn:"見学スタート ▶", idleTitle:"タテイシ広美社 ものづくり見学ツアー", idleSub:"看板・LEDビジョンができるまでを、その場で体験", idleTap:"タップしてスタート ▶", endTitle:"見学おつかれさまでした！", endBody:"最後に、実際のEloタッチサイネージでサイネージ制作を疑似体験してみましょう。<br>QRコードから見学の感想アンケートにもご協力ください。", backTopBtn:"トップにもどる"},
-  en:{menuBrand:"T-KOBISHA Factory Tour", menuTitle:"Choose a stop on the tour", menuSub:"Tap any stop to view it, or press Start Tour to go through them in order.", startBtn:"Start Tour ▶", idleTitle:"T-KOBISHA Factory Tour", idleSub:"Experience how signage and LED vision are made", idleTap:"Tap to Start ▶", endTitle:"Thanks for joining the tour!", endBody:"Finally, try creating signage content yourself on our Elo touch signage demo unit.<br>Please also scan the QR code for a short survey.", backTopBtn:"Back to Top"}
-};
-function setLang(l){
-  lang = l;
-  const t = I18N[l];
-  document.getElementById('idleTitle').textContent = t.idleTitle;
-  document.getElementById('idleSub').textContent = t.idleSub;
-  document.getElementById('idleTap').textContent = t.idleTap;
-  document.getElementById('menuBrand').textContent = t.menuBrand;
-  document.getElementById('detailBrand').textContent = t.menuBrand;
-  document.getElementById('endBrand').textContent = t.menuBrand;
-  document.getElementById('menuTitle').textContent = t.menuTitle;
-  document.getElementById('menuSub').textContent = t.menuSub;
-  document.getElementById('startBtn').textContent = t.startBtn;
-  document.getElementById('endTitle').textContent = t.endTitle;
-  document.getElementById('endBody').innerHTML = t.endBody;
-  document.getElementById('backTopBtn').textContent = t.backTopBtn;
-  [['btnJa','btnEn'],['btnJa2','btnEn2']].forEach(([jaId,enId])=>{
-    const jaEl=document.getElementById(jaId), enEl=document.getElementById(enId);
-    if(jaEl){ jaEl.classList.toggle('active', l==='ja'); enEl.classList.toggle('active', l==='en'); }
-  });
-  buildStopGrid();
-  if(document.getElementById('screen-detail').classList.contains('active')) showDetail();
-}
-
-buildStopGrid();
+window.addEventListener('hashchange',route); route();
 </script>
 </body>
 </html>
